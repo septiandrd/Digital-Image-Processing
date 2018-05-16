@@ -22,7 +22,7 @@ function varargout = PCD(varargin)
 
 % Edit the above text to modify the response to help PCD
 
-% Last Modified by GUIDE v2.5 06-Mar-2018 13:49:18
+% Last Modified by GUIDE v2.5 16-May-2018 12:51:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -80,8 +80,14 @@ function btn_browse_Callback(hObject, eventdata, handles)
 [Filename,Pathname] = uigetfile({'*.jpg';'*.png';'*.bmp'},'Browse Image');
 name = strcat(Pathname,Filename);
 img = imread(name);
+imsize = size(img);
+height = imsize(1);
+width = imsize(2);
 axes(handles.axes1);
 handles.imgName.String = name;
+fileinfo = dir(name);
+filesize = fileinfo().bytes / 1000;
+handles.imgSize.String = "Image size = " + height + "x" + width + " pixel,  " + filesize + " KB";
 imshow(img);
 imsize = size(img);
 set(handles.w1,'string',num2str(1));
@@ -352,6 +358,13 @@ if (get(handles.imgName,'String'))
     img = imread(get(handles.imgName,'String'));
     axes(handles.axes1);
     imshow(img);
+    
+    imsize = size(img);
+    height = imsize(1);
+    width = imsize(2);
+    fileinfo = dir(get(handles.imgName,'String'));
+    filesize = fileinfo().bytes / 1000;
+    handles.imgSize.String = "Image size = " + height + "x" + width + " pixel,  " + filesize + " KB";
     
     h = img(:,:,1);
     [x,y]=size(h);
@@ -821,8 +834,8 @@ function btnVerticalFlip_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 img = getimage(handles.axes1);
-imsize = size(img)
-height = imsize(2);
+imsize = size(img);
+height = imsize(1);
 [flipR,flipG,flipB] = deal([]);
 for i=height:-1:1
     flipR = [flipR;img(i,:,1)];
@@ -1335,8 +1348,8 @@ convR = zeros(height,width);
 convG = zeros(height,width);
 convB = zeros(height,width);
 
-for i=2:width-1
-    for j=2:height-1
+for i=2:height-1
+    for j=2:width-1
         convR(i,j) = sum(sum(c.*double(imgR(i-1:i+1,j-1:j+1))));
         convG(i,j) = sum(sum(c.*double(imgG(i-1:i+1,j-1:j+1))));
         convB(i,j) = sum(sum(c.*double(imgB(i-1:i+1,j-1:j+1))));
@@ -1370,8 +1383,8 @@ convR = zeros(height,width);
 convG = conv2(imgG,c,'same');
 convB = conv2(imgB,c,'same');
 
-for i=2:width-1
-    for j=2:height-1
+for i=2:height-1
+    for j=2:width-1
         convR(i,j) = sum(sum(c.*double(imgR(i-1:i+1,j-1:j+1))));
         convG(i,j) = sum(sum(c.*double(imgG(i-1:i+1,j-1:j+1))));
         convB(i,j) = sum(sum(c.*double(imgB(i-1:i+1,j-1:j+1))));
@@ -1404,8 +1417,8 @@ convR = zeros(height,width);
 convG = conv2(imgG,c,'same');
 convB = conv2(imgB,c,'same');
 
-for i=2:width-1
-    for j=2:height-1
+for i=2:height-1
+    for j=2:width-1
         convR(i,j) = sum(sum(c.*double(imgR(i-1:i+1,j-1:j+1))));
         convG(i,j) = sum(sum(c.*double(imgG(i-1:i+1,j-1:j+1))));
         convB(i,j) = sum(sum(c.*double(imgB(i-1:i+1,j-1:j+1))));
@@ -1449,8 +1462,8 @@ convR = zeros(height,width);
 convG = zeros(height,width);
 convB = zeros(height,width);
 
-for i=2:width-1
-    for j=2:height-1
+for i=2:height-1
+    for j=2:width-1
         convR(i,j) = sum(sum(c.*double(imgR(i-1:i+1,j-1:j+1))));
         convG(i,j) = sum(sum(c.*double(imgG(i-1:i+1,j-1:j+1))));
         convB(i,j) = sum(sum(c.*double(imgB(i-1:i+1,j-1:j+1))));
@@ -1461,3 +1474,425 @@ imgConv = cat(3,convR(2:height-1,2:width-1),convG(2:height-1,2:width-1),convB(2:
 imgConv = uint8(imgConv);
 axes(handles.axes1);
 imshow(imgConv);
+
+
+% --- Executes on button press in btnMedian.
+function btnMedian_Callback(hObject, eventdata, handles)
+% hObject    handle to btnMedian (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+img = getimage(handles.axes1);
+
+imsize = size(img);
+height = imsize(1);
+width = imsize(2);
+
+img = padarray(img,[1 1],0,'post');
+
+imgR = img(:,:,1);
+imgG = img(:,:,2);
+imgB = img(:,:,3);
+
+convR = zeros(height,width);
+convG = zeros(height,width);
+convB = zeros(height,width);
+
+for i=1:height
+    for j=1:width
+        convR(i,j) = median(median(imgR(i:i+1,j:j+1)));
+        convG(i,j) = median(median(imgG(i:i+1,j:j+1)));
+        convB(i,j) = median(median(imgB(i:i+1,j:j+1)));
+    end
+end
+
+imgMedian = cat(3,convR(:,:),convG(:,:),convB(:,:));
+imgMedian = uint8(imgMedian);
+axes(handles.axes1);
+imshow(img)
+imshow(imgMedian);
+
+% --- Executes on button press in btnModus.
+function btnModus_Callback(hObject, eventdata, handles)
+% hObject    handle to btnModus (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+img = getimage(handles.axes1);
+
+imsize = size(img);
+height = imsize(1);
+width = imsize(2);
+
+img = padarray(img,[1 1],0,'post');
+
+imgR = img(:,:,1);
+imgG = img(:,:,2);
+imgB = img(:,:,3);
+
+convR = zeros(height,width);
+convG = zeros(height,width);
+convB = zeros(height,width);
+
+for i=1:height
+    for j=1:width
+        convR(i,j) = mode(mode(imgR(i:i+1,j:j+1)));
+        convG(i,j) = mode(mode(imgG(i:i+1,j:j+1)));
+        convB(i,j) = mode(mode(imgB(i:i+1,j:j+1)));
+    end
+end
+
+imgMean = cat(3,convR(:,:),convG(:,:),convB(:,:));
+imgMean = uint8(imgMean);
+axes(handles.axes1);
+imshow(img)
+imshow(imgMean);
+
+% --- Executes on button press in btnMean.
+function btnMean_Callback(hObject, eventdata, handles)
+% hObject    handle to btnMean (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+img = getimage(handles.axes1);
+
+imsize = size(img);
+height = imsize(1);
+width = imsize(2);
+
+img = padarray(img,[1 1],0,'post');
+
+imgR = img(:,:,1);
+imgG = img(:,:,2);
+imgB = img(:,:,3);
+
+convR = zeros(height,width);
+convG = zeros(height,width);
+convB = zeros(height,width);
+
+for i=1:height
+    for j=1:width
+        convR(i,j) = mean(mean(imgR(i:i+1,j:j+1)));
+        convG(i,j) = mean(mean(imgG(i:i+1,j:j+1)));
+        convB(i,j) = mean(mean(imgB(i:i+1,j:j+1)));
+    end
+end
+
+imgMean = cat(3,convR(:,:),convG(:,:),convB(:,:));
+imgMean = uint8(imgMean);
+axes(handles.axes1);
+imshow(img)
+imshow(imgMean);
+
+
+% --- Executes on button press in btnWand.
+function btnWand_Callback(hObject, eventdata, handles)
+% hObject    handle to btnWand (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+img = getimage(handles.axes1);
+imsize = size(img);
+height = imsize(1);
+width = imsize(2);
+axes(handles.axes1);
+imshow(img);
+[x,y] = getpts;
+pixR = img(round(y),round(x),1);
+pixG = img(round(y),round(x),2);
+pixB = img(round(y),round(x),3);
+
+minR = pixR-20;
+maxR = pixR+20;
+minG = pixG-20;
+maxG = pixG+20;
+minB = pixB-20;
+maxB = pixB+20;
+
+imgR = img(:,:,1);
+imgG = img(:,:,2);
+imgB = img(:,:,3);
+
+segR = zeros(height,width);
+segG = zeros(height,width);
+segB = zeros(height,width);
+
+for i=1:width
+    for j=1:height
+        if img(j,i,1) >= minR && img(j,i,1) <= maxR && img(j,i,2) >= minG && img(j,i,2) <= maxG && img(j,i,3) >= minB && img(j,i,3) <= maxB
+            segR(j,i) = 255;
+            segG(j,i) = 255;
+            segB(j,i) = 255;
+        end
+    end
+end
+
+imgSeg = cat(3,segR(:,:),segG(:,:),segB(:,:));
+imgSeg = uint8(imgSeg);
+axes(handles.axes1);
+imshow(imgSeg);
+
+
+
+function minR_Callback(hObject, eventdata, handles)
+% hObject    handle to minR (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of minR as text
+%        str2double(get(hObject,'String')) returns contents of minR as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function minR_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to minR (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function maxR_Callback(hObject, eventdata, handles)
+% hObject    handle to maxR (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of maxR as text
+%        str2double(get(hObject,'String')) returns contents of maxR as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function maxR_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to maxR (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function minG_Callback(hObject, eventdata, handles)
+% hObject    handle to minG (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of minG as text
+%        str2double(get(hObject,'String')) returns contents of minG as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function minG_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to minG (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function maxG_Callback(hObject, eventdata, handles)
+% hObject    handle to maxG (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of maxG as text
+%        str2double(get(hObject,'String')) returns contents of maxG as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function maxG_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to maxG (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function minB_Callback(hObject, eventdata, handles)
+% hObject    handle to minB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of minB as text
+%        str2double(get(hObject,'String')) returns contents of minB as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function minB_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to minB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function maxB_Callback(hObject, eventdata, handles)
+% hObject    handle to maxB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of maxB as text
+%        str2double(get(hObject,'String')) returns contents of maxB as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function maxB_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to maxB (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in btnRGBSegmentation.
+function btnRGBSegmentation_Callback(hObject, eventdata, handles)
+% hObject    handle to btnRGBSegmentation (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+minR = str2double(get(handles.minR,'String'));
+maxR = str2double(get(handles.maxR,'String'));
+minG = str2double(get(handles.minG,'String'));
+maxG = str2double(get(handles.maxG,'String'));
+minB = str2double(get(handles.minB,'String'));
+maxB = str2double(get(handles.maxB,'String'));
+
+img = getimage(handles.axes1);
+imsize = size(img);
+height = imsize(1);
+width = imsize(2);
+
+imgR = img(:,:,1);
+imgG = img(:,:,2);
+imgB = img(:,:,3);
+
+segR = zeros(height,width);
+segG = zeros(height,width);
+segB = zeros(height,width);
+
+for i=1:width
+    for j=1:height
+        if img(j,i,1) >= minR && img(j,i,1) <= maxR && img(j,i,2) >= minG && img(j,i,2) <= maxG && img(j,i,3) >= minB && img(j,i,3) <= maxB
+            segR(j,i) = 255;
+            segG(j,i) = 255;
+            segB(j,i) = 255;
+        end
+    end
+end
+
+imgSeg = cat(3,segR(:,:),segG(:,:),segB(:,:));
+imgSeg = uint8(imgSeg);
+axes(handles.axes1);
+imshow(imgSeg);
+
+
+% --- Executes on button press in btnDilasi.
+function btnDilasi_Callback(hObject, eventdata, handles)
+% hObject    handle to btnDilasi (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+s=getimage(handles.axes1);
+g=im2bw(s);
+b=[0 0 1 0 0;0 1 1 1 0;1 1 1 1 1;0 1 1 1 0;0 0 1 0 0];
+[p q]=size(b);
+[m n]=size(g);
+temp= zeros(m,n);
+for i=1:m
+    for j=1:n
+        if (g(i,j)==1)
+            for k=1:p
+                for l=1:q
+                    if(b(k,l)==1)
+                       c=i+k;
+                       d=j+l;
+                       temp(c,d)=1;
+                    end
+                end
+            end
+        end
+    end
+end
+axes(handles.axes1);
+imshow(temp);
+
+% --- Executes on button press in btnErosi.
+function btnErosi_Callback(hObject, eventdata, handles)
+% hObject    handle to btnErosi (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+img=getimage(handles.axes1);
+img=im2bw(img);
+E=[1 1 0];
+img=padarray(img,[0 1],1);
+temp=zeros(size(img));
+for i=1:size(img,1)
+    for j=1:size(img,2)-2
+        In=img(i,j:j+2);
+        In1=find(E==1);
+        if(In(In1)==1)
+        temp(i,j)=1;
+        end
+    end
+end
+axes(handles.axes1);
+imshow(temp);
+
+
+% --- Executes on button press in btnCompress.
+function btnCompress_Callback(hObject, eventdata, handles)
+% hObject    handle to btnCompress (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+img=getimage(handles.axes1);
+imsize = size(img);
+height = imsize(1);
+width = imsize(2);
+
+imgR = img(:,:,1);
+imgG = img(:,:,2);
+imgB = img(:,:,3);
+
+comR = zeros(height,width);
+comG = zeros(height,width);
+comB = zeros(height,width);
+
+for i=1:width
+    for j=1:height
+        comR(j,i) = idivide(imgR(j,i),5);
+        comG(j,i) = idivide(imgG(j,i),5);
+        comB(j,i) = idivide(imgB(j,i),5);
+    end
+end
+
+imgCom = cat(3,comR(:,:),comG(:,:),comB(:,:));
+imgCom = uint8(imgCom)*5;
+axes(handles.axes1);
+imshow(imgCom);
+
+% handles.imgName.String = strcat(pwd,'/compressed.jpg');
+imwrite(imgCom,'compressed.jpg');
+fileinfo = dir('compressed.jpg');
+filesize = fileinfo().bytes / 1000;
+handles.imgSize.String = "Image size = " + height + "x" + width + " pixel,  " + filesize + " KB";
